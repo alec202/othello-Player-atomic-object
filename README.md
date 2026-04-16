@@ -1,0 +1,1 @@
+# othello-Player-atomic-object
