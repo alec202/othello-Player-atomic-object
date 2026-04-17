@@ -1,18 +1,23 @@
+// const { init } = require("next/dist/compiled/webpack/webpack");
+
 let board;
 let player;
 let opposing_player;
 
-class SetofTuples {
-    constructor() {
-        this.set = new Set()
-    }
+class SetOfTuples extends Set {
 
     add(tuple) {
-        this.set.add(JSON.stringify(tuple));
+        super.add(JSON.stringify(tuple));
+        return this;
     }
 
     has(tuple) {
-        this.set.has(JSON.stringify(tuple));
+        return super.has(JSON.stringify(tuple));
+    }
+
+    getVal() {
+        return JSON.parse(this.set.values().next().value);
+
     }
 }
 
@@ -33,11 +38,12 @@ function getMove(playerNum, currentBoard) {
 function determine_move() {
     // determine all of the valid moves
     const all_valid_moves = determine_all_valid_moves();
+    // const best_move = determine_best_move();
 }
 
 function determine_all_valid_moves() {
     /**
-     * @returns {array} - 2D array where each sub-array contains two integers representing a valid move that this player can make,
+     * @returns {SetOfTuples} - SetOfTuples where each sub-array contains two integers representing a valid move that this player can make,
     therefore returning all the valid moves this player can make.
      */
 
@@ -47,8 +53,7 @@ function determine_all_valid_moves() {
     */
 
     /** @type {set} */
-    const all_moves = new SetofTuples();
-    const potential_moves = new SetofTuples();
+    let potential_moves = new SetOfTuples();
     // we will get all potential moves and then need to filter out the real moves available
     for (let i = 0; i < 8; i++) {
         const row = board[i]
@@ -61,27 +66,37 @@ function determine_all_valid_moves() {
             */
             if (val_at_col === opposing_player) {
                 const possible_moves = moves_next_to_this_opponent_chip(i, j);
-                potential_moves.union(possible_moves);
+                console.log("possible moves found");
+                console.log(possible_moves)
+                potential_moves = potential_moves.union(possible_moves);
             }
-            /*
-            We have acquired all potential moves. Let's filter out the moves that don't have another one of our chips in
-            any direction, because we need to sandwich the opponent chips by having our chips on both ends. If we choose a move
-            that won't have one of our chips in any of the rows/columns/diagonals then it's an invalid move.
-            */
         }
     }
+    /*
+We have acquired all potential moves (without checking for sandwhich rule). 
+Let's filter out the moves that don't have another one of our chips in
+any direction, because we need to sandwich the opponent chips by having our chips 
+on both ends. If we choose a move that won't have one of our chips in any 
+of the rows/columns/diagonals then it's an invalid move.
+
+One thing to watch out for: the values stored in the set are still JSON strings,
+so if you iterate the set directly you'll get strings back. May want to also 
+override values(), forEach(), etc. to parse them back into list items. HOWEVER
+THIS MAY NOT MATTER SINCE THE PREPARE RESPONSE FUNCTION TURNS MY MOVE INTO A STRING 
+ANYWAYS, SO ONLY IF WE NEED THE SET ITEM AS A LIST INTERNALLY WILL IT MATTER.
+*/
+
 }
 
-function moves_next_to_this_opponent_chip(row, col) {
+function moves_next_to_this_opponent_chip(opponent_chip_row, opponent_chip_col) {
     /**
-     * @param {number} row - number of row in the board
-     * @param {number} col - column number for the board we are checking pieces for
+     * @param {number} opponent_chip_row - number of row in the board
+     * @param {number} opponent_chip_col - column number for the board we are checking pieces for
      */
-    const potential_moves = new SetofTuples()
-    // first check if all the spaces around this piece are already filled as we don't want to waste time checking
+    const potential_moves = new SetOfTuples()
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
-            curr_space = ([row + i, col + j]);
+            curr_space = ([opponent_chip_row + i, opponent_chip_col + j]);
             curr_row = curr_space[0];
             curr_col = curr_space[1];
             // make sure the column and rows are in bounds
@@ -95,9 +110,7 @@ function moves_next_to_this_opponent_chip(row, col) {
         }
     }
 
-    console.log("potential moves are: ");
-    console.log(potential_moves);
-    return JSON.parse(potential_moves[0]);
+    return potential_moves;
 }
 
 function prepareResponse(move) {
@@ -105,5 +118,28 @@ function prepareResponse(move) {
     console.log(`Sending response ${response}`);
     return response;
 }
+
+function codeTest() {
+    const initial_received = {
+        "board":
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 2, 0, 0, 0],
+                [0, 0, 0, 2, 1, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]
+            ],
+        "maxTurnTime": 15000,
+        "player": 1
+    }
+
+    getMove(initial_received.player, initial_received.board)
+
+}
+
+codeTest();
 
 module.exports = { getMove, prepareResponse };
