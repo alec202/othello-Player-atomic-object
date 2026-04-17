@@ -69,7 +69,7 @@ def moves_available_in_surrounding_spaces(val, row, col):
     :param val: int representing if this space has been played already, and if so, by whom.
     :param col: int for column number representing the space we want to check if it's playable.
     :param row: into for row number representing the space we want to check if it's playable.
-    :return: boolean representing if this space is playable.
+    :return: set of tuples of all potentially playable moves.
     """
     potential_moves = set()
     # first check if all the spaces around this piece are already filled as we don't want to waste time checking
@@ -80,7 +80,7 @@ def moves_available_in_surrounding_spaces(val, row, col):
             curr_col = curr_space[1]
             # make sure the column and rows are in bounds
             if 0 <= curr_row < 8 and 0 <= curr_col < 8:
-                # make sure this spot is empty and therefor available
+                # make sure this spot is empty and therefore available
                 if board[curr_row][curr_col] == 0:
                     # if this space is available, lets add it to the potential spaces
                     potential_moves.add(curr_space)
