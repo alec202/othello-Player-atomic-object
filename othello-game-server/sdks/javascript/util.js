@@ -16,7 +16,7 @@ class SetofTuples {
     }
 }
 
-function getMove(player, currentBoard) {
+function getMove(playerNum, currentBoard) {
     // TODO: Determine valid moves
     // Update global reference.
     board = currentBoard;
@@ -33,8 +33,6 @@ function getMove(player, currentBoard) {
 function determine_move() {
     // determine all of the valid moves
     const all_valid_moves = determine_all_valid_moves();
-
-
 }
 
 function determine_all_valid_moves() {
@@ -61,7 +59,7 @@ function determine_all_valid_moves() {
             opposing player to ensure we aren't checking spaces that aren't even touching the rest
             of the chips because that would be invalid. Have to sandwich opposing player chips.
             */
-            if (val == opposing_player) {
+            if (val_at_col === opposing_player) {
                 const possible_moves = moves_next_to_this_opponent_chip(i, j);
                 potential_moves.union(possible_moves);
             }
@@ -72,7 +70,6 @@ function determine_all_valid_moves() {
             */
         }
     }
-
 }
 
 function moves_next_to_this_opponent_chip(row, col) {
@@ -90,15 +87,17 @@ function moves_next_to_this_opponent_chip(row, col) {
             // make sure the column and rows are in bounds
             if ((0 <= curr_row && curr_row < 7) && (0 <= curr_col && curr_col < 8)) {
                 // make sure this spot is empty and therefore available
-                if (board[curr_row][curr_col] == 0) {
+                if (board[curr_row][curr_col] === 0) {
                     // if this space is available, lets add it to the potential spaces
                     potential_moves.add(curr_space)
                 }
             }
-
         }
     }
-    return potential_moves;
+
+    console.log("potential moves are: ");
+    console.log(potential_moves);
+    return JSON.parse(potential_moves[0]);
 }
 
 function prepareResponse(move) {
